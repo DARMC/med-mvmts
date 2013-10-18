@@ -1,5 +1,16 @@
 # Others #
 *.csv
+# spatial file types
+*.shp
+*.dbf
+*.prj
+*.shx
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.qgs
+
 
 # Compiled source #
 ###################
