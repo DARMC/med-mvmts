@@ -1,8 +1,6 @@
 import shapefile as shp
 import urllib
 import unicodecsv as ucsv
-from geopy import geocoders
-from time import sleep
 
 def read_input(points, delChar=','):
     # just encode the input file as UTF-8 and save yourself the hassle unless special chars are required
@@ -41,36 +39,19 @@ def add_geometry(sf, x1, y1, x2, y2, row):
     """
     Add exactly two points to a shapefile
     """
-    sf.line(parts = [[[x1,y1],[x2,y2]]])
+    sf.line(parts = [[[x1, y1],[x2, y2]]])
     sf.records.append(row)
 
     return sf
-
-class BoundingBox(object):
-    def __init__(self, box):
-        self.x1 = float(box[0][0])
-        self.x2 = float(box[1][0])
-        self.y1 = float(box[0][1])
-        self.y2 = float(box[1][0])
-
-    def is_in_box(self, point_x, point_y):
-        latitude = False
-        longitude = False
-        if point_x >= min(self.x1, self.x2) and point_x <= max(self.x1, self.x2):
-            longitude = True
-        if point_y >= min(self.y1, self.y2) and point_y <= max(self.y1, self.y2): 
-            latitude = True 
-        return True if latitude and longitude else False
 
 class Voyage(object):
     def __init__(self, raw_movements, trip_id):
         self.data = raw_movements
         self.uid = trip_id
         self.segments = []
-   
-    def describe_trip(self):
-        """Optional method for debugging"""
-        print 'Processing trip {0}'.format(self.uid)
+    
+    def __repr__(self):
+        return 'Processing trip {0}'.format(self.uid)  
 
     def parse_trip(self):
         ordered_trip = {}
@@ -82,7 +63,7 @@ class Voyage(object):
                 segment = [self.uid, str(seg), ordered_trip[seg][4], ordered_trip[seg][5], 
                            ordered_trip[seg][6], ordered_trip[seg+1][4], 
                            ordered_trip[seg+1][5], ordered_trip[seg+1][6], ordered_trip[seg][21],
-                           ordered_trip[seg][24], ordered_trip[seg][27][0:254]] # boom, triple indexing
+                           ordered_trip[seg][24], ordered_trip[seg][27][0:254]]
                 print "{0}.{1}: {2} to {3}".format(self.uid, str(seg), ordered_trip[seg][4], ordered_trip[seg+1][4])
                 self.segments.append(segment)
                 seg += 1
@@ -94,40 +75,21 @@ class Voyage(object):
 
 if __name__ == '__main__':
     f = 'movements'
-    database = read_input('trips.csv')
     
-    # alas, geocoder is worthless for historical place names
-    # failure and error rate is so high that we might as well do it by hand
-    """box = ((-13, 25),(52, 60))
-    b = BoundingBox(((-13, 25),(52, 60)))
-    g = geocoders.GoogleV3()
-    for line in database:
-        # geocode if it already doesn't have coordinates
-        if line[5] == '' and line[6] == '':
-            print 'Attempting to geocode {0}'.format(line[4])
-            try:
-                print g.geocode(line[4], exactly_one=False)
-                print '\n' 
-                if b.is_in_box(float(lng), float(lat)):
-                    print 'Geocoded!'
-                    line[5], line[6] = lat, lng
-                else:
-                    print 'Found point but not in Europe'
-            except ValueError:
-                print 'No point returned or too many points'
-            sleep(2)
-        else:
-            pass"""
-
+    # load  raw data
+    database = read_input('trips.csv')
     headers = ['Trip #', 'Stage', 'Start', 'Start_lat', 
                'Start_long', 'End', 'End_lat', 'Eng_long', 
                'Traveler', 'Purpose', 'Description']
     output = []
+
+    # convert raw data into line segments
     for trip in set([x[1] for x in database]):
         v = Voyage([p for p in database if p[1] == trip], trip)
         v.parse_trip()
         output.append(v.return_new_string())
 
+    #write csv output
     with open(f+'.csv', 'w') as outf:
         wr = ucsv.writer(outf)
         wr.writerow(headers)       
@@ -138,19 +100,12 @@ if __name__ == '__main__':
     # set up shapefile 
     write_prj_file(f)
     shapefile = set_up_shapefile(headers)
+    
+    # write data to shapefile
     for trip in output:
         for lseg in trip:
-            print lseg
             try:
-                add_geometry(shapefile, float(lseg[4]), float(lseg[3]), float(lseg[7]),float(lseg[6]), lseg)
+                add_geometry(shapefile, float(lseg[4]), float(lseg[3]), float(lseg[7]), float(lseg[6]), lseg)
             except ValueError:
                 pass
     shapefile.save(f)
-
-
-
-
-
-
-
-
