@@ -56,7 +56,11 @@ class Voyage(object):
     def parse_trip(self):
         ordered_trip = {}
         for row in self.data:
-            ordered_trip[int(row[2])] = row
+            try:
+                ordered_trip[int(row[2])] = row
+            except ValueError:
+                print 'Missing sorting data'
+                ordered_trip[1] = row
         seg = 1
         while True: # a little bit hacky, could be better 
             try:
@@ -69,6 +73,9 @@ class Voyage(object):
                 seg += 1
             except KeyError:
                 break
+            except UnicodeEncodeError, UnicodeDecodeError:
+                print "Encode failed on trip {0}.{1}".format(self.uid, seg)
+                seg += 1
 
     def return_new_string(self):
         return self.segments
