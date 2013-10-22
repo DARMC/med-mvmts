@@ -4,12 +4,12 @@ import sys
 import time as t
 
 def load_file(f):
+    """Read in CSV fle and return it as a list of lists"""
     if not os.path.exists(f):
         sys.exit('Source file not found')
-    data = []
+    
     with open(f, 'rU') as inf:
-        r = ucsv.reader(inf)
-        data = [item for item in r]
+        data = [item for item in ucsv.reader(inf)]
 
     return data
 
@@ -18,16 +18,20 @@ class StaticGeocoder(object):
         self.ctd = centroids
         self.pts = points
 
+    def __repr__(self, target):
+        return 'Static Geocoder'
+
     def resolve_conflicted_matches(self, matches):   
+        """Allow user to resolve multiple matches manually"""
         print '{0} Possible Matches:'.format(len(matches))
         # allow users to manually select correct geocode
         for idx, x in enumerate(matches): 
             print '{0}. ({1}) {2} [{3:.4},{4:.4}]'.format(idx+1, x[4], x[5], x[6], x[7])
         target = int(raw_input('Select desired match by index: '))
-        #print matches[target-1]
         return matches[target-1]  
   
     def attempt_strict_geocode(self, target, centroid_mode = False):
+        """Attempt to find an exact match for the place name"""
         exact_matches = []
         c_name, c_lat, c_long = target[4], target[5], target[6]
         print 'Attempting to match {0}'.format(c_name)
@@ -42,6 +46,7 @@ class StaticGeocoder(object):
         return exact_matches
 
     def attempt_fuzzy_geocode(self, target, centroid_mode = False):
+        """Attempt to find a fuzzy match for the place name"""
         #TODO
         pass
  
@@ -56,17 +61,20 @@ if __name__ == '__main__':
     geocode_candidates = load_file(sys.argv[1])
     
     # set up geocoder object
-    gc = StaticGeocoder(locations, centroids)
-
+    gc = StaticGeocoder(locations, centroids)    
     output = []
     output.append(geocode_candidates[0])
-    print output
+
     # attempt to geocode points
     for candidate in geocode_candidates[1:]:
         matches = gc.attempt_strict_geocode(candidate)
+        # if no exact match is found
         if len(matches) == 0:
+            # fuzzy_matches = gc.attempt_fuzzy_geocode(candidate)
+            #   should return a tuple of the point and highest probability (probability should also be written into the output file)
             pass
-        # if a match is found
+        
+        # if an exact match is found
         else:
             # check if list contains mutliple sublists (i.e. multiple matches)
             # improve this?
