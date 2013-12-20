@@ -10,6 +10,8 @@
 *.doc
 *.docx
 *.qgs
+*.png
+*.tsv
 
 
 # Compiled source #
