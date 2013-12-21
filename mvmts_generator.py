@@ -9,41 +9,6 @@ def read_input(points, delChar=','):
         data = [line for line in reader]
     return data[1:]
 
-def write_prj_file(fname, epsg=4326):
-    """
-    Writes .prj file fname associated with target projection epsg.
-    Writes to epsg 4326 (WGS 1984) by default. Honestly, kwarg is only included for robustness.
-    """
-    try:
-        wktString  = urllib.urlopen("http://spatialreference.org/ref/epsg/{0}/prettywkt/".format(epsg))
-        with open('{0}.prj'.format(fname), 'w') as prjFile:
-            prjFile.write(wktString.read())
-    except IOError:
-        print 'Unable to fetch EPSG string for prj file. Projection can be still be defined on import to GIS client'
-    return True
-
-def set_up_shapefile(fieldNames):
-    """
-    Returns a shapefile with specified field names and a blank,
-    well-shaped attribute table
-    """
-    sf = shp.Writer(shp.POLYLINE)
-    sf.autoBalance = 1
-    for f in fieldNames:
-        sf.field(f, 'C', '255')
-        for r in sf.records:
-            r.append('')
-    return sf
-
-def add_geometry(sf, x1, y1, x2, y2, row):
-    """
-    Add exactly two points to a shapefile
-    """
-    sf.line(parts = [[[x1, y1],[x2, y2]]])
-    sf.records.append(row)
-
-    return sf
-
 class Voyage(object):
     def __init__(self, raw_movements, trip_id):
         self.data = raw_movements
@@ -103,16 +68,3 @@ if __name__ == '__main__':
         for trip in output:
             for part in trip:
                 wr.writerow(part)
-
-    # set up shapefile 
-    write_prj_file(f)
-    shapefile = set_up_shapefile(headers)
-    
-    # write data to shapefile
-    for trip in output:
-        for lseg in trip:
-            try:
-                add_geometry(shapefile, float(lseg[4]), float(lseg[3]), float(lseg[7]), float(lseg[6]), lseg)
-            except ValueError:
-                pass
-    shapefile.save(f)
