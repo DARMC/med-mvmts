@@ -1,13 +1,15 @@
-import shapefile as shp
-import urllib
-import unicodecsv as ucsv
+import unicodecsv as csv
 
 def read_input(points, delChar=','):
-    # just encode the input file as UTF-8 and save yourself the hassle unless special chars are required
     with open(points, 'rU') as inf:
-        reader = ucsv.reader(inf, delimiter = delChar)
-        data = [line for line in reader]
-    return data[1:]
+        return [line for line in csv.reader(inf, delimiter=delChar)][1:]
+
+def flatten(inlist):
+    output = []
+    for row in inlist:
+        for part in row:
+            output.append(part)
+    return output
 
 class Voyage(object):
     def __init__(self, raw_movements, trip_id):
@@ -29,10 +31,11 @@ class Voyage(object):
         seg = 1
         while True: # a little bit hacky, could be better 
             try:
-                segment = [self.uid, str(seg), ordered_trip[seg][4], ordered_trip[seg][5], 
-                           ordered_trip[seg][6], ordered_trip[seg+1][4], 
-                           ordered_trip[seg+1][5], ordered_trip[seg+1][6], ordered_trip[seg][21],
-                           ordered_trip[seg][24], ordered_trip[seg][27][0:254]]
+                segment = [self.uid, str(seg), ordered_trip[seg][4], 
+                        ordered_trip[seg][5], ordered_trip[seg][6], 
+                        ordered_trip[seg+1][4], ordered_trip[seg+1][5], 
+                        ordered_trip[seg+1][6], ordered_trip[seg][21],
+                        ordered_trip[seg][24], ordered_trip[seg][27][0:254]]
                 print "{0}.{1}: {2} to {3}".format(self.uid, str(seg), ordered_trip[seg][4], ordered_trip[seg+1][4])
                 self.segments.append(segment)
                 seg += 1
@@ -45,16 +48,14 @@ class Voyage(object):
     def return_new_string(self):
         return self.segments
 
-if __name__ == '__main__':
-    f = 'movements'
-    
+if __name__ == '__main__':    
     # load  raw data
     database = read_input('trips.csv')
     headers = ['Trip #', 'Stage', 'Start', 'Start_lat', 
                'Start_long', 'End', 'End_lat', 'Eng_long', 
                'Traveler', 'Purpose', 'Description']
+    
     output = []
-
     # convert raw data into line segments
     for trip in set([x[1] for x in database]):
         v = Voyage([p for p in database if p[1] == trip], trip)
@@ -62,9 +63,7 @@ if __name__ == '__main__':
         output.append(v.return_new_string())
 
     #write csv output
-    with open(f+'.csv', 'w') as outf:
-        wr = ucsv.writer(outf)
-        wr.writerow(headers)       
-        for trip in output:
-            for part in trip:
-                wr.writerow(part)
+    with open('movements.csv', 'w') as outf:
+        writer = csv.writer(outf)
+        writer.writerow(headers)       
+        writer.writerows(flatten(output))
