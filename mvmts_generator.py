@@ -1,15 +1,6 @@
 import unicodecsv as csv
-
-def read_input(points, delChar=','):
-    with open(points, 'rU') as inf:
-        return [line for line in csv.reader(inf, delimiter=delChar)][1:]
-
-def flatten(inlist):
-    output = []
-    for row in inlist:
-        for part in row:
-            output.append(part)
-    return output
+import itertools
+import sys
 
 class Voyage(object):
     def __init__(self, raw_movements, trip_id):
@@ -50,10 +41,12 @@ class Voyage(object):
 
 if __name__ == '__main__':    
     # load  raw data
-    database = read_input('trips.csv')
-    headers = ['Trip #', 'Stage', 'Start', 'Start_lat', 
-               'Start_long', 'End', 'End_lat', 'Eng_long', 
-               'Traveler', 'Purpose', 'Description']
+    database = [line for line in csv.reader(open(sys.argv[1],'rU'))][1:]
+
+    #database = read_input('trips.csv')
+    headers = ['TRIP_ID', 'STAGE', 'START', 'ST_LAT', 
+               'ST_LNG', 'END', 'END_LAT', 'END_LNG', 
+               'TRAVELER', 'PURPOSE', 'DESCR']
     
     output = []
     # convert raw data into line segments
@@ -66,4 +59,4 @@ if __name__ == '__main__':
     with open('movements.csv', 'w') as outf:
         writer = csv.writer(outf)
         writer.writerow(headers)       
-        writer.writerows(flatten(output))
+        writer.writerows(list(itertools.chain(*output)))
