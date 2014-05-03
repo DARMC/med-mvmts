@@ -7,7 +7,7 @@ Dependencies:
 
 Updating the Database
 --------------------
-Download the main data as a csv file from the Mediterranean Movements project folder on Google Drive. No manual formatting of the data is necessary. Name this file ``complete_movements_spreadsheet.csv```, although this is not needed if you do not plan to use the single-stage formatter.
+Download the main data as a csv file from the Mediterranean Movements project folder on Google Drive. No manual formatting of the data is necessary. Name this file ```complete_movements_spreadsheet.csv```.
 
 From the med-mvmts project folder, run ```processing_workflow.py```.
 
