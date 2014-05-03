@@ -86,6 +86,6 @@ if __name__ == '__main__':
         writer = csv.writer(outf)
         writer.writerow(['TRIP_ID', 'STAGE', 'START', 'ST_LAT', 'ST_LNG',
                          'END', 'END_LAT', 'END_LNG', 'TRAVELER', 'PURPOSE',
-                         'DESCR', 'Q' 'WKT'])
+                         'DESCR', 'Q', 'WKT'])
         writer.writerows(output)
     print '| - Runtime {0:.2f} seconds.'.format(time() - start)
