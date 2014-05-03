@@ -56,8 +56,8 @@ class Voyage:
                     for y in next_point_variations:
                         wkt_string = 'LINESTRING({0} {1}, {2} {3})'.format(x[6], x[5], y[6], y[5])
                         correct_trip_segments.append([self.uid, str(len(correct_trip_segments)+1),
-                                                      x[4], x[5], x[6], y[4], y[5], y[6], x[21], x[24],
-                                                      x[27][0:254], '?' if len(x) > 1 or len(y) > 1 else '',
+                                                      x[4], x[5], x[6], y[4], y[5], y[6], x[21], x[24].upper(),
+                                                      x[27][0:254], '?' if len(current_point_variations) > 1 or len(next_point_variations) > 1 else '',
                                                       wkt_string])
                 current_trip_segment += 1
 
