@@ -13,6 +13,10 @@ class Voyage:
         return 'Processing trip {0}'.format(self.uid)  
 
     def parse_trip(self):
+    	"""
+    	Convert a voyage's raw data into a series of ordered
+    	segments, e.g. a->b, b->c, c-d, etc.
+    	""" 
         ordered_trip = {}
         for row in self.data:
             try:
@@ -44,7 +48,7 @@ if __name__ == '__main__':
     start = time()    
     # load  raw data
     database = [line for line in csv.reader(open(sys.argv[1],'rU'))][1:]
-    
+  
     output = []
     # convert raw data into line segments
     for trip in set([x[1] for x in database]):

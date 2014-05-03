@@ -1,6 +1,7 @@
 import unicodecsv as csv
 import sys
 import argparse
+from collections import Counter
 
 def already_in(s, uniques, directed):
     '''
@@ -10,20 +11,19 @@ def already_in(s, uniques, directed):
     If the candidate segment is already in the list, increment that row's
     weighting field by one.
     '''
-    if not directed:
-        for row in uniques:
-            if row[2] == s[2] and row[5] == s[5]:
+    for row in uniques:
+        if directed:
+            for row in uniques:
+                if row[2] == s[2] and row[5] == s[5]:
+                    row[-1] += 1
+                    return uniques
+        else:
+            if set([row[2], row[5]]) == set([s[2], s[5]]):
                 row[-1] += 1
                 return uniques
 
-    elif directed:
-        for row in uniques:
-            if row[2] == s[2] and row[5] == s[5] or \
-            row[5] == s[2] and row[2] == s[5]:
-                row[-1] += 1
-                return uniques
-
-    return False
+    else:
+        return False
 
 def unique(valid_segments, directionality):
     '''
@@ -47,31 +47,34 @@ def set_up_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('infile', type=str)
     parser.add_argument('outfile', type=str)
-    parser.add_argument('--directional', action="store_true")
+    parser.add_argument('--directed', action="store_true")
     parser.add_argument('--force_unique', action="store_true")
+
     return parser.parse_args()  
 
 if __name__ == '__main__':
     args = set_up_arguments()
     print '\n---  Mediterranean Movements Validator ---'
+    print '>> Execution Parameters:'
     if args.force_unique:
-        print '>> Forcing unique segments only'
-    if args.directional:
-        print '>> Considering directionality'
+        print '   | - Returning unique segments only'
+    if args.directed:
+        print '   | - Considering directionality'
     else:
-        print '>> Ignoring directionality\n'
+        print '   > Ignoring directionality\n'
 
     raw_data = [row for row in csv.reader(open(args.infile, 'rU'))]
     print '>> Retrieved {0} total movements'.format(len(raw_data))
     
     valid_segments = [row for row in raw_data if row[3] != '' and row[4] != '' \
                       and row[6] != '' and row[7] != '']
+
     print '>> Filtered {0} geocoded movements'.format(len(valid_segments))
     
     with open(args.outfile, 'w') as outf:
         writer = csv.writer(outf)
         if args.force_unique:
-            writer.writerows(unique(valid_segments, args.directional))
+            writer.writerows(unique(valid_segments, args.directed))
         else:
             print '>> Wrote {0} valid movements'.format(len(valid_segments))
             writer.writerows(valid_segments)
