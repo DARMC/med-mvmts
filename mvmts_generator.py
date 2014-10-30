@@ -6,14 +6,15 @@ from time import time
 
 class NoNextPointException(Exception):
     """
-    An exception to stop iteration when no 'next point' is found during parsing of trip segments
+    An exception to stop iteration when no 'next point' is 
+    found during parsing of trip segments
     """
     pass
 
 def read_input(infile):
     """
-    Return a list of lists from a csv file 'infile', attempting to provide a graceful
-    and informative exist if the file cannot be read.
+    Return a list of lists from a csv file 'infile', attempting to provide 
+    a graceful and informative exit if the file cannot be read.
 
     Parameters
     ----------

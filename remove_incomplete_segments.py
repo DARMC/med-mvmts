@@ -1,12 +1,5 @@
 import argparse
-# will run without UnicodeCSV, but it probably won't work
-try:
-    import unicodecsv as csv
-except ImportError:
-    print 'WARNING: Failed to import unicodecsv module - handling of accent characters may be unpredictable.'
-    print ' - This module is not supported without the unicodescv module'
-    import csv
-
+import unicodecsv as csv
 
 def already_in(s, uniques, directed):
     """
@@ -90,17 +83,17 @@ if __name__ == '__main__':
             print '   | - Ignoring directionality as a criteria for uniqueness'
 
     raw_data = [row for row in csv.reader(open(args.infile, 'rU'))]
-    print '| - Retrieved {0} total movements'.format(len(raw_data))
+    print '| - Retrieved {} total movements'.format(len(raw_data))
     
     valid_segments = [row for row in raw_data if row[3] != '' and row[4] != '' \
                       and row[6] != '' and row[7] != '']
 
-    print '| - Filtered {0} geocoded movements'.format(len(valid_segments))
+    print '| - Filtered {} geocoded movements'.format(len(valid_segments))
     
     with open(args.outfile, 'w') as outf:
         writer = csv.writer(outf)
         if args.force_unique:
             writer.writerows(unique(valid_segments, args.directed))
         else:
-            print '| - Wrote {0} valid movements'.format(len(valid_segments))
+            print '| - Wrote {} valid movements'.format(len(valid_segments))
             writer.writerows(valid_segments)
